@@ -3,6 +3,8 @@ import base64, json, requests
 from enum import Enum
 import time
 
+from .utils import createStateKey
+
 class Token_Data(Enum):
     ACCESS_TOKEN = 0
     AUTHENTICATION_HEADER = 1
@@ -11,7 +13,7 @@ class Token_Data(Enum):
 
 
 class SpotifyAuth():
-    SPOTIFY_URL_AUTH = 'https://accounts.spotify.com/authorize/?'
+    SPOTIFY_URL_AUTH = 'https://accounts.spotify.com/authorize?'
     SPOTIFY_URL_TOKEN = 'https://accounts.spotify.com/api/token/'
     RESPONSE_TYPE = 'code'
     HEADER = 'application/x-www-form-urlencoded'
@@ -19,8 +21,8 @@ class SpotifyAuth():
     def __init__(self, config):
         self.refresh_token = ''
         self.token_data = []
-
         self.config = config
+        self.curr_state_key = None
 
     @property
     def is_authenticated(self):
@@ -32,14 +34,13 @@ class SpotifyAuth():
 
     @property
     def redirect_uri(self):
-        return f"{self.config['callback_url']}:{self.config['port']}/callback/"
+        return f"{self.config['callback_url']}:{self.config['port']}/callback"
 
-    @property
-    def auth_str(self): # vas getUser
-        return f"{SpotifyAuth.SPOTIFY_URL_AUTH}client_id={self.config['client_id']}&response_type=code&redirect_uri={self.redirect_uri}&scope={self.config['scope']}"
+    def getAuthUrl(self):
+        # self.curr_state_key = createStateKey(15)
+        return f"{SpotifyAuth.SPOTIFY_URL_AUTH}client_id={self.config['client_id']}&response_type=code&redirect_uri={self.redirect_uri}&scope={self.config['scope']}" #&state={self.curr_state_key}"
 
     def handleToken(self, response):
-        print("RESPONSE: ", response)
         auth_head = {"Authorization": f"Bearer {response['access_token']}"}
         self.refresh_token = response["refresh_token"]
         return [response["access_token"], auth_head, response["scope"], time.time() + response["expires_in"]]
@@ -64,6 +65,7 @@ class SpotifyAuth():
 
     def getUserToken(self, code):
         self.token_data = self.getToken(code)
+        return True
 
 
     def refreshAuth(self):
@@ -78,8 +80,38 @@ class SpotifyAuth():
         return self.handleToken(payback)
 
 
-    def refreshToken(self, time):
-        time.sleep(time)
+    def refreshToken(self):
         self.token_data = self.refreshAuth()
 
 
+    def checkTokenStatus(self, session):
+        if time.time() > session['token_expiration']:
+            payload = self.refreshToken(session['refresh_token'])
+        if payload != None:
+            session['token'] = payload[0]
+            session['token_expiration'] = time.time() + payload[1]
+        else:
+            return None
+        return "Success"
+
+
+    def makeGetRequest(self, session, url, params={}):
+        headers = {"Authorization": "Bearer {}".format(session['token'])}
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 401 and self.checkTokenStatus(session) != None:
+            return self.makeGetRequest(session, url, params)
+        else:
+            print('makeGetRequest:' + str(response.status_code))
+            return None
+
+
+    def getUserInformation(self, session):
+        url = 'https://api.spotify.com/v1/me'
+        payload = self.makeGetRequest(session, url)
+
+        if payload == None:
+            return None
+
+        return payload
