@@ -1,9 +1,13 @@
-# inspired from https://github.com/vanortg/Flask-Spotify-Auth
+# inspired from https://github.com/vanortg/Flask-Spotify-Auth and https://github.com/lucaoh21/Spotify-Discover-2.0
 import base64, json, requests
 from enum import Enum
 import time
+import random as rand
+import string as string
 
-from .utils import createStateKey
+def createStateKey(size):
+    #https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
+    return ''.join(rand.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(size))
 
 class Token_Data(Enum):
     ACCESS_TOKEN = 0

@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-        <title>💿 Super-Playlister-3000 💿</title>
-    </head>
-    <body>
-        <div class="content">
-            <a href="/auth">Login</a>
-        </div>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block head %}
+	{{ super() }}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='login.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<div class='message'>
+<h1>You have too many liked songs</h1>
+<h2>♡ Split them into even more playlists ♡</h2>
+<a class="login_btn" href="/auth"><i class="fab fa-spotify"></i>Login with spotify</a>
+</div>
+{% endblock %}

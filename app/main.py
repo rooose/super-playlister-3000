@@ -1,8 +1,6 @@
 from flask import Flask, request, render_template, redirect, session, make_response
 from flask_cors import CORS
 
-from .utils import createStateKey
-
 from .config import CONFIG
 from .spotify_auth import *
 from functools import wraps

@@ -1,0 +1,29 @@
+#content {
+    font-family: 'Fira Sans', sans-serif;
+    text-align: center;
+    position: relative;
+    height: 100%;
+}
+
+#content .message {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+h1 {
+    font-family: 'Barlow', 'sans-serif';
+    color:var(--spotify-green);
+    font-size:50px;
+}
+
+h2 {
+    color: var(--light);
+    font-size: 30px;
+}
+
+.login_btn {
+
+}
