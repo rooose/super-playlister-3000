@@ -1,13 +1,32 @@
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-        <title>💿 Super-Playlister-3000 💿</title>
-    </head>
-    <body>
-        <div class="content">
-            Welcome home!
-        </div>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block head %}
+	{{ super() }}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='login.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+          $('a#test').on('click', function(e) {
+            // console.log('reorder')
+            e.preventDefault()
+            $.getJSON('/reorder',
+                function(data) {
+                  console.log(data)
+            });
+            return false;
+          });
+        });
+</script>
+
+<div class='message'>
+<a href=# class="login_btn" id=test><button class='btn btn-default'><i class="fab fa-spotify"></i>Reorder liked songs</button></a>
+</div>
+{% endblock %}
+
+
+

@@ -71,3 +71,8 @@ def home():
 
    return render_template('home.html')
 
+
+@app.route('/reorder')
+def reorder_songs():
+   print("wow reordered so fast")
+   return ("nothing")

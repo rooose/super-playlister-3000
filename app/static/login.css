@@ -22,8 +22,34 @@ h1 {
 h2 {
     color: var(--light);
     font-size: 30px;
+    padding-bottom: 100px;
+}
+
+i {
+    padding-right: 10px;
 }
 
 .login_btn {
+    padding:20px;
+    font-size: 20px;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #1b1515, #171212);
+    box-shadow:  15px 15px 45px #0a0808,
+                 -15px -15px 45px #282020;
 
+    color: white;
+}
+
+.login_btn:hover {
+    text-decoration: none;
+    color: #FFFFFF;
+    background: #232323;
+    text-shadow: 0 0 5px #FFF, 0 0 10px var(--lighter-green), 0 0 15px var(--lighter-green), 0 0 20px var(--lighter-green), 0 0 30px  var(--lighter-green);
+}
+
+.login_btn:active {
+    border-radius: 56px;
+    background: #191414;
+    box-shadow: inset 15px 15px 45px #0a0808,
+                inset -15px -15px 45px #282020;
 }
