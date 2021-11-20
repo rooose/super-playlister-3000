@@ -5,6 +5,8 @@ from .config import CONFIG
 from .spotify_auth import *
 from functools import wraps
 
+import time
+
 # TODO: Use Flask sessions
 app = Flask(__name__)
 app.secret_key = "super secret key"
@@ -72,7 +74,17 @@ def home():
    return render_template('home.html')
 
 
+@app.route('/fetch')
+@authenticated_resource
+def fetch_songs():
+   time.sleep(3)
+   print("wow fetching so fast")
+   return ("nothing")
+
+
 @app.route('/reorder')
+@authenticated_resource
 def reorder_songs():
+   time.sleep(3)
    print("wow reordered so fast")
    return ("nothing")

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
 	{{ super() }}
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='login.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='home.css') }}">
 
 {% endblock %}
 
@@ -24,7 +24,13 @@
 </script>
 
 <div class='message'>
-<a href=# class="login_btn" id=test><button class='btn btn-default'><i class="fab fa-spotify"></i>Reorder liked songs</button></a>
+  <a href=# class="login_btn" id=test><button class='btn btn-default'><i class="fab fa-spotify"></i>Reorder liked songs</button></a>
+  <p>Fetching songs</p>
+  <p>Fetching songs</p>
+  
+  <div class="loader1">
+    <div class="neumo"></div>
+</div>
 </div>
 {% endblock %}
 
