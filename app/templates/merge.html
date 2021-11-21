@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block head %}
+	{{ super() }}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='features.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<div class='options'>
+    <div class='left_side'>
+        <h1>Sources</h1>
+        <div class='playlists'>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

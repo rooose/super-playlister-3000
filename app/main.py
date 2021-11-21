@@ -74,6 +74,33 @@ def home():
    return render_template('home.html')
 
 
+@app.route("/split", methods=['GET'])
+@authenticated_resource
+def split():
+   if spotify_helper.needs_refresh:
+      spotify_helper.refresh_token()
+
+   return render_template('split.html')
+
+
+@app.route("/reorder", methods=['GET'])
+@authenticated_resource
+def reorder():
+   if spotify_helper.needs_refresh:
+      spotify_helper.refresh_token()
+
+   return render_template('reorder.html')
+
+
+@app.route("/merge", methods=['GET'])
+@authenticated_resource
+def merge():
+   if spotify_helper.needs_refresh:
+      spotify_helper.refresh_token()
+
+   return render_template('merge.html')
+
+
 @app.route('/fetch')
 @authenticated_resource
 def fetch_songs():
