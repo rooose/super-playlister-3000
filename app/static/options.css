@@ -1,0 +1,121 @@
+#content {
+    font-family: 'Fira Sans', sans-serif;
+    text-align: center;
+    position: relative;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#content .message {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.submit_btn {
+    padding:20px;
+    font-size: 20px;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #1b1515, #171212);
+    box-shadow:  15px 15px 45px #0a0808,
+                 -15px -15px 45px #282020;
+
+    color: white;
+}
+
+i {
+    padding-right: 10px;
+}
+
+.path_button {
+    margin: 100px 0px;
+}
+
+.submit_btn:hover {
+    text-decoration: none;
+    color: #FFFFFF;
+    background: #232323;
+    text-shadow: 0 0 5px #FFF, 0 0 10px var(--lighter-green), 0 0 15px var(--lighter-green), 0 0 20px var(--lighter-green), 0 0 30px  var(--lighter-green);
+}
+
+.submit_btn:active {
+    border-radius: 56px;
+    background: #191414;
+    box-shadow: inset 15px 15px 45px #0a0808,
+                inset -15px -15px 45px #282020;
+}
+
+
+form {
+    border-radius: 10px;
+    background: #191414;
+    box-shadow: inset 20px 20px 60px #0a0808,
+                inset -20px -20px 60px #282020;
+    text-align: left;
+    padding:10px 0px 10px 10px;
+    overflow-y: scroll;
+    height: 50vh;
+}
+
+.split {
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+    padding: 20px 20px;
+  }
+  
+  /* Control the left side */
+  .left {
+    left: 0;
+  }
+  
+  /* Control the right side */
+  .right {
+    right: 0;
+  }
+
+.options-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+
+.options-row {
+    height: 50vh;
+    top: 0;
+  }
+
+.button-row {
+    top: 50vh;
+    padding-top:100px;
+    bottom: 0;
+  }
+
+
+.custom-checkbox {
+    border-radius: 50%;
+    background-color: linear-gradient(145deg, #1b1515, #171212);
+    box-shadow:  20px 20px 60px #0a0808,
+                -20px -20px 60px #282020;
+    cursor: pointer;
+}
+
+.title {
+  color: var(--spotify-green);
+  text-align: left;
+  padding-left: 10px;
+  font-size: 25px;
+  font-weight: 200;
+}
+
+.playlist-title {
+  color: white;
+  font-weight: 600;
+}
