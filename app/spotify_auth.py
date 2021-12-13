@@ -123,3 +123,6 @@ class SpotifyAuth():
 
 def getAllPlaylistsURL(user_id, limit, offset=0):
     return f'https://api.spotify.com/v1/users/{user_id}/playlists?limit={limit}&offset={offset}'
+
+def getTracksInfo(tracks):
+    return f'https://api.spotify.com/v1/audio-features?ids={tracks}'

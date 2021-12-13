@@ -1,1 +1,36 @@
-reorder
+{% extends "base.html" %}
+{% block head %}
+	{{ super() }}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='options.css') }}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+
+<div class="options-menu">
+    <div class='options-row'>
+        <div class='split left'>
+            <p class="title">💿 Select source playlists to reorder</p>
+            <form>
+                {%for p in playlists%}
+                    <input class="custom-checkbox" type="checkbox" id="{{p['id']}}" name="{{p['name']}}" value="{{p['id']}}">
+                    <label class="playlist-title" for="{{p['id']}}">{{p['name']}}</label><br>
+                {%endfor%}
+            </form>
+        </div>
+
+        <div class='split right'>
+
+        </div>
+    </div>
+    <div class='button-row'>
+        <div class="path_button"><a href="#" class="submit_btn"><i class="fab fa-spotify"></i>Go!</a></div>
+    </div>
+</div>
+{% endblock %}
+
+
+

@@ -50,7 +50,7 @@ i {
 }
 
 
-form {
+.selection {
     border-radius: 10px;
     background: #191414;
     box-shadow: inset 20px 20px 60px #0a0808,

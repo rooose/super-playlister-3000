@@ -1,4 +1,6 @@
+from re import S
 from flask import Flask, request, render_template, redirect, session, make_response
+from flask.templating import render_template_string
 from flask_cors import CORS
 
 from .config import CONFIG
@@ -6,6 +8,8 @@ from .spotify_auth import *
 from functools import wraps
 
 import time
+import ast
+import numpy as np
 
 # TODO: Use Flask sessions
 app = Flask(__name__)
@@ -81,7 +85,6 @@ def home():
 def split():
     if spotify_helper.needs_refresh:
         spotify_helper.refresh_token()
-
     return render_template('split.html', playlists=fetch_playlists())
 
 
@@ -91,22 +94,35 @@ def reorder():
     if spotify_helper.needs_refresh:
         spotify_helper.refresh_token()
 
-    return render_template('reorder.html')
+    return render_template('reorder.html', playlists=fetch_playlists())
 
 
-@app.route("/merge", methods=['GET'])
+@app.route("/merge", methods=['GET', 'POST'])
 @authenticated_resource
 def merge():
+    playlists_to_merge = []
+    tracks = []
+    tracks_info = []
+
     if spotify_helper.needs_refresh:
         spotify_helper.refresh_token()
 
-    return render_template('merge.html')
+    if request.method == "POST":
+        playlists_to_merge = request.form.getlist('playlists_to_merge')
+        tracks = fetch_tracks(playlists_to_merge)
+        tracks_info = fetch_tracks_info(tracks)
+        # created_playlist = merge_tracks()
+        return render_template('done.html', playlists=[])
 
+    return render_template('merge.html', playlists=fetch_playlists())
 
-@app.route('/fetch')
-@authenticated_resource
 def fetch_playlists():
-    playlists = []
+    playlists = [{
+                "id": "saved_tracks",
+                "name": "Saved Tracks",
+                "tracks_info": "https://api.spotify.com/v1/me/tracks"
+            }]
+
     offset = 0
     limit = 50
     url = getAllPlaylistsURL(session['user_id'], limit, offset)
@@ -116,18 +132,74 @@ def fetch_playlists():
         items = response['items']
         url = response['next']
 
-        if not url:
-            break
-
         for data in items:
             playlists.append({
-                "id":data["id"],
+                "id": data["id"],
                 "name": data["name"],
                 "tracks_info": data["tracks"]
             })
 
+        if not url:
+            break
+
     return playlists
 
+
+def fetch_tracks(playlists_data):
+    playlists = {}
+
+    for p in playlists_data:
+        data = ast.literal_eval(p)
+        playlists[data['id']] = data
+
+    for p_id in playlists:
+        url = playlists[p_id]['tracks_info']['href']
+        tracks = {}
+
+        while True:
+            response = spotify_helper.makeGetRequest(session, url)
+            items = response['items']
+            url = response['next']
+
+            for data in items:
+                track_data = data['track']
+
+                if track_data['type'] != 'track':
+                    break
+
+                tracks[track_data["id"]] = {
+                    "name": track_data["name"],
+                    "url": track_data["href"]
+                }
+
+            if not url:
+                break
+
+        playlists[p_id]['tracks'] = tracks
+
+    return playlists
+
+
+def fetch_tracks_info(playlists) :
+    limit = 50
+    audio_features_fields = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
+
+    for p_id in playlists:
+        all_tracks_ids = list(playlists[p_id]['tracks'].keys())
+        tracks_chunks = [all_tracks_ids[i:i + limit] for i in range(0, len(all_tracks_ids), limit)] 
+
+        for chunk in tracks_chunks:
+            chunk_tracks_ids = ','.join(chunk)
+            url = getTracksInfo(chunk_tracks_ids)
+            response = spotify_helper.makeGetRequest(session, url)
+            items = response['audio_features']
+
+            for item in items:
+                t_id = item['id']
+                audio_features = np.array([v for k,v in item.items() if k in audio_features_fields])
+                playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
+
+    return playlists
 
 @app.route('/reorder')
 @authenticated_resource
