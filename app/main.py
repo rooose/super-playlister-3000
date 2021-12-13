@@ -120,7 +120,7 @@ def fetch_playlists():
     playlists = [{
                 "id": "saved_tracks",
                 "name": "Saved Tracks",
-                "tracks_info": "https://api.spotify.com/v1/me/tracks"
+                "tracks_info": {'href':"https://api.spotify.com/v1/me/tracks"}
             }]
 
     offset = 0
@@ -169,7 +169,8 @@ def fetch_tracks(playlists_data):
 
                 tracks[track_data["id"]] = {
                     "name": track_data["name"],
-                    "url": track_data["href"]
+                    "url": track_data["href"],
+                    "audio_features": None
                 }
 
             if not url:
@@ -181,7 +182,7 @@ def fetch_tracks(playlists_data):
 
 
 def fetch_tracks_info(playlists) :
-    limit = 50
+    limit = 100
     audio_features_fields = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
 
     for p_id in playlists:
@@ -195,9 +196,11 @@ def fetch_tracks_info(playlists) :
             items = response['audio_features']
 
             for item in items:
-                t_id = item['id']
-                audio_features = np.array([v for k,v in item.items() if k in audio_features_fields])
-                playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
+                if item is not None:
+                    t_id = item['id']
+                    audio_features = np.array([v for k,v in item.items() if k in audio_features_fields])
+                    playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
+
 
     return playlists
 
