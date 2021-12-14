@@ -10,6 +10,7 @@ from functools import wraps
 import time
 import ast
 import numpy as np
+import random
 
 # TODO: Use Flask sessions
 app = Flask(__name__)
@@ -111,10 +112,13 @@ def merge():
         playlists_to_merge = request.form.getlist('playlists_to_merge')
         tracks = fetch_tracks(playlists_to_merge)
         tracks_info = fetch_tracks_info(tracks)
-        # created_playlist = merge_tracks()
-        return render_template('done.html', playlists=[])
+        name = request.form.getstr('out_name')
+        make_public = request.form.getstr('out_visibility')
+        created_playlist = merge_tracks(tracks_info, name, make_public, session)
+        return render_template('done.html', playlists=[created_playlist])
 
     return render_template('merge.html', playlists=fetch_playlists())
+
 
 def fetch_playlists():
     playlists = [{
@@ -170,6 +174,7 @@ def fetch_tracks(playlists_data):
                 tracks[track_data["id"]] = {
                     "name": track_data["name"],
                     "url": track_data["href"],
+                    "uri": track_data["uri"],
                     "audio_features": None
                 }
 
@@ -191,7 +196,7 @@ def fetch_tracks_info(playlists) :
 
         for chunk in tracks_chunks:
             chunk_tracks_ids = ','.join(chunk)
-            url = getTracksInfo(chunk_tracks_ids)
+            url = getTracksInfoURL(chunk_tracks_ids)
             response = spotify_helper.makeGetRequest(session, url)
             items = response['audio_features']
 
@@ -203,6 +208,46 @@ def fetch_tracks_info(playlists) :
 
 
     return playlists
+
+
+def merge_tracks(playlists, name, make_public, flask_session):
+
+    tracks_uris = []
+
+    for p_id in playlists:
+        for t_id in playlists[p_id]['tracks']:
+            tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
+
+    random.shuffle(tracks_uris)
+    return create_and_add_playlist(name, make_public, tracks_uris, flask_session)
+
+
+def create_and_add_playlist(name, make_public, tracks, flask_session):
+
+    url = getCreatePlaylistURL(flask_session['user_id'])
+    body = {
+        'name': name,
+        'description': 'Merge playlist created by SUPER-PLAYLISTER-3000',
+        'public': make_public
+    }
+
+    created_playlist = spotify_helper.makePostRequest(flask_session, url, body=body)
+
+    limit = 100
+    pos = 0
+    url = created_playlist['tracks']['href']
+    tracks_chunks = [tracks[i:i + limit] for i in range(0, len(tracks), limit)]
+    
+    for chunk in tracks_chunks:
+        body = {
+            'position': pos,
+            'uris': chunk
+        }
+        spotify_helper.makePostRequest(flask_session, url, body=body)
+        pos += len(chunk)
+
+    return created_playlist
+
 
 @app.route('/reorder')
 @authenticated_resource

@@ -111,6 +111,22 @@ class SpotifyAuth():
             return None
 
 
+    def makePostRequest(self, session, url, params={}, body={}):
+        headers = {
+            "Authorization": "Bearer {}".format(session['token'])
+            }
+
+        response = requests.post(url, headers=headers,  params=params, json=body)
+
+        if response.status_code == 201:
+            return response.json()
+        elif response.status_code == 401 and self.checkTokenStatus(session) != None:
+            return self.makePostRequest(session, url, body)
+        else:
+            print('makePostRequest:' + str(response.status_code))
+            return None
+
+
     def getUserInformation(self, session):
         url = 'https://api.spotify.com/v1/me'
         payload = self.makeGetRequest(session, url)
@@ -124,5 +140,8 @@ class SpotifyAuth():
 def getAllPlaylistsURL(user_id, limit, offset=0):
     return f'https://api.spotify.com/v1/users/{user_id}/playlists?limit={limit}&offset={offset}'
 
-def getTracksInfo(tracks):
+def getTracksInfoURL(tracks):
     return f'https://api.spotify.com/v1/audio-features?ids={tracks}'
+
+def getCreatePlaylistURL(user_id):
+    return f'https://api.spotify.com/v1/users/{user_id}/playlists'
