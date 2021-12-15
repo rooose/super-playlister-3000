@@ -11,6 +11,7 @@ import time
 import ast
 import numpy as np
 import random
+import csv
 
 # TODO: Use Flask sessions
 app = Flask(__name__)
@@ -112,9 +113,13 @@ def merge():
         playlists_to_merge = request.form.getlist('playlists_to_merge')
         tracks = fetch_tracks(playlists_to_merge)
         tracks_info = fetch_tracks_info(tracks)
-        name = request.form.getstr('out_name')
-        make_public = request.form.getstr('out_visibility')
-        created_playlist = merge_tracks(tracks_info, name, make_public, session)
+        name = request.form.get('merged_playlist_name')
+        if name is None:
+            name = 'Merged Playlist'
+
+        make_public =  request.form.get('merge_is_public') is not None
+        merge_by_order = request.form.get('merge_order_mode_style')
+        created_playlist = merge_tracks(tracks_info, name, make_public, merge_by_order, session)
         return render_template('done.html', playlists=[created_playlist])
 
     return render_template('merge.html', playlists=fetch_playlists())
@@ -206,28 +211,33 @@ def fetch_tracks_info(playlists) :
                     audio_features = np.array([v for k,v in item.items() if k in audio_features_fields])
                     playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
 
-
     return playlists
 
 
-def merge_tracks(playlists, name, make_public, flask_session):
-
+def merge_tracks(playlists, name, make_public, merge_by_order, flask_session):
     tracks_uris = []
 
     for p_id in playlists:
         for t_id in playlists[p_id]['tracks']:
             tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
 
-    random.shuffle(tracks_uris)
-    return create_and_add_playlist(name, make_public, tracks_uris, flask_session)
+    if merge_by_order:
+        # change it to do smth cool
+        random.shuffle(tracks_uris)
+    else:
+        random.shuffle(tracks_uris)
+
+    merged_playlists = [playlists[p_id]['name'] for p_id in playlists]
+    description = f"Merge playlist created by SUPER-PLAYLISTER-3000. Created from : {', '.join(merged_playlists)}"
+    return create_and_add_playlist(name, description, make_public, tracks_uris, flask_session)
 
 
-def create_and_add_playlist(name, make_public, tracks, flask_session):
+def create_and_add_playlist(name, descr, make_public, tracks, flask_session):
 
     url = getCreatePlaylistURL(flask_session['user_id'])
     body = {
         'name': name,
-        'description': 'Merge playlist created by SUPER-PLAYLISTER-3000',
+        'description': descr,
         'public': make_public
     }
 

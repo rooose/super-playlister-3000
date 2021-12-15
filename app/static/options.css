@@ -78,7 +78,11 @@ i {
   
   /* Control the right side */
   .right {
+    padding-left: 50px;
+    padding-top:70px;
     right: 0;
+    align-content: left;
+    text-align: left;
   }
 
 .options-menu {
@@ -118,4 +122,18 @@ i {
 .playlist-title {
   color: white;
   font-weight: 600;
+}
+
+.options-title {
+  color: white;
+  font-size: 20px;
+}
+
+.options-label {
+  color:rgb(197, 197, 197);
+}
+
+.options-label-padded {
+  color:rgb(197, 197, 197);
+  padding-left: 10px;
 }

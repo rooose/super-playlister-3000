@@ -29,12 +29,23 @@
             </div>
             
             <div class='split right'>
-                
+                <p class="options-title">Options: </p>
+
+                <label class="options-label" for="merged_playlist_name">Playlist name</label><br>
+                <input type="text" id="merged_playlist_name" name="merged_playlist_name" placeholder="Merged Playlist"><br><br>
+
+                <input type="checkbox" id="merge_public" name="merge_is_public" value="true">
+                <label class="options-label-padded" for="merge_public">Make merged playlist public</label><br>
+
+                <input checked type="radio" id="merge_rnd" name="merge_order_mode_style" value=false>
+                <label class="options-label-padded" for="merge_rnd">Shuffle randomly</label><br>
+
+                <input type="radio" id="merge_style" name="merge_order_mode_style" value=true>
+                <label class="options-label-padded" for="merge_style">Order by style</label><br>
             </div>
         </div>
         <div class='button-row'>
-            <!-- <div class="path_button"><a href="#" class="submit_btn"><i class="fab fa-spotify"></i>Go!</a></div> -->
-            <input type="submit" class="path_button" class="submit_btn" value="Go!" onclick="loading();">
+            <input type="submit" class="path_button submit_btn" value="Go!" onclick="loading();">
         </div>
     </form>
 </div>
