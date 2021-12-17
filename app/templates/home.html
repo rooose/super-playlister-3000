@@ -23,11 +23,17 @@
         });
 </script>
 
-<div class='message'>
+<div class="navbar-row">
+  <span class="path_button"><a class="login_btn" href="/"><i class="fas fa-home"></i></a></span>
+  <span class="path_button"><a class="login_btn" href="/login"><i class="fas fa-sign-out-alt"></i></a></span>
+</div>
+
+<div class="message-row">
   <div class="path_button"><a href="/merge" class="login_btn"><i class="fas fa-stop"></i>Merge Playlists</a></div>
   <div class="path_button"><a href="/split" class="login_btn"><i class="fas fa-th-large"></i>Split Playlist</a></div>
   <div class="path_button"><a href="/reorder" class="login_btn"><i class="fas fa-redo-alt"></i>Reorder Playlists</a></div>
 </div>
+
 {% endblock %}
 
 

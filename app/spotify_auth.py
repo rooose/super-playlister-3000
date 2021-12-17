@@ -28,6 +28,11 @@ class SpotifyAuth():
         self.config = config
         self.curr_state_key = None
 
+    def clear(self):
+        self.refresh_token = ''
+        self.token_data = []
+        self.curr_state_key = None
+
     @property
     def is_authenticated(self):
         return len(self.token_data) != 0 and time.time() < self.token_data[Token_Data.EXPIRATION.value]

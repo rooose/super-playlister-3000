@@ -3,7 +3,7 @@ from flask import Flask, request, render_template, redirect, session, make_respo
 from flask.templating import render_template_string
 from flask_cors import CORS
 
-from .config import CONFIG
+from .config import CONFIG, APP_SECRET
 from .spotify_auth import *
 from functools import wraps
 
@@ -15,7 +15,7 @@ import csv
 
 # TODO: Use Flask sessions
 app = Flask(__name__)
-app.secret_key = "super secret key"
+app.secret_key = APP_SECRET
 CORS(app)
 
 
@@ -26,6 +26,7 @@ state_key = None
 @app.route("/login", methods=['GET'])
 def login():
     session.clear()
+    spotify_helper.clear()
     return render_template('login.html')
 
 
@@ -49,7 +50,7 @@ def callback():
         code = request.args.get('code')
         spotify_helper.curr_state_key = None
 
-        success = spotify_helper.getUserToken(request.args['code'])
+        success = spotify_helper.getUserToken(code)
         if success:
             session['token'] = spotify_helper.token_data[0]
             session['refresh_token'] = spotify_helper.refresh_token
@@ -242,8 +243,8 @@ def fetch_tracks_info(playlists) :
                     audio_features = [v for k,v in item.items() if k in audio_features_fields]
                     playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
 
-    with open('out.json', 'w') as f:
-        json.dump(playlists, f)
+    # with open('out.json', 'w') as f:
+    #     json.dump(playlists, f)
     return playlists
 
 
