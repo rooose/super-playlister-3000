@@ -130,10 +130,19 @@ i {
 }
 
 .options-label {
-  color:rgb(197, 197, 197);
+  color:var(--spotify-green);
 }
 
 .options-label-padded {
   color:rgb(197, 197, 197);
   padding-left: 10px;
+}
+
+.sub-label {
+  color:var(--spotify-green);
+  padding-top: 20px;
+}
+
+#split_in_n {
+  margin-left: 10px;
 }

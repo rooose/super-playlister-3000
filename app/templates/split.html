@@ -19,13 +19,37 @@
         <p class="title">💿 Select source playlists to split</p>
         <div class="selection">
           {%for p in playlists%}
-          <input class="custom-checkbox" type="checkbox" id="{{p['id']}}" name="{{p['name']}}" value="{{p['id']}}" />
+          <input class="custom-checkbox" type="checkbox" id="{{p['id']}}" name="playlists_to_split" value="{{p}}" />
           <label class="playlist-title" for="{{p['id']}}">{{p['name']}}</label><br />
           {%endfor%}
         </div>
       </div>
 
-      <div class="split right"></div>
+      <div class="split right">
+        <p class="options-title">Options:</p>
+
+        <p class="sub-label">Visibility:</p>
+        <input checked type="radio" id="split_all_public" name="split_visibility" value="ALL_PUBLIC" />
+        <label class="options-label-padded" for="split_all_public">All public</label><br />
+
+        <input checked type="radio" id="split_keep_visibility" name="split_visibility" value="KEEP_VISIBILITY" />
+        <label class="options-label-padded" for="split_keep_visibility">Keep visibility</label><br />
+
+        <input type="radio" id="split_all_private" name="split_visibility" value="ALL_PRIVATE" />
+        <label class="options-label-padded" for="split_all_private">All private</label><br />
+
+        <p class="sub-label">Order:</p>
+        <input checked type="radio" id="split_rnd" name="split_order_mode_style" value="false" />
+        <label class="options-label-padded" for="split_rnd">Split randomly</label><br />
+
+        <input type="radio" id="split_style" name="split_order_mode_style" value="true" />
+        <label class="options-label-padded" for="split_style">Split by style</label><br />
+
+        <p class="sub-label">Split in:</p>
+        <label class="options-label-padded" for="split_in_n">Split in N playlists (0 for automatic split):</label>
+        <input type="number" id="split_in_n" name="split_in" min="0" max="100" value=0>
+
+      </div>
     </div>
     <div class="button-row">
       <input type="submit" class="path_button submit_btn" value="Go!" onclick="loading();" />

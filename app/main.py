@@ -25,6 +25,7 @@ state_key = None
 
 @app.route("/login", methods=['GET'])
 def login():
+    session.clear()
     return render_template('login.html')
 
 
@@ -82,21 +83,48 @@ def home():
     return render_template('home.html')
 
 
-@app.route("/split", methods=['GET'])
+@app.route("/split", methods=['GET', 'POST'])
 @authenticated_resource
 def split():
     if spotify_helper.needs_refresh:
         spotify_helper.refresh_token()
+
+    if request.method == "POST":
+        playlists_to_reorder = request.form.getlist('playlists_to_split')
+        tracks = fetch_tracks(playlists_to_reorder)
+        tracks_info = fetch_tracks_info(tracks)
+
+        split_in = int(request.form.get('split_in'))
+        split_in = max(split_in, 1)
+        split_by_style = request.form.get('split_order_mode_style')
+        visibility =  request.form.get('split_visibility')
+
+        created_playlists = split_playlists(tracks_info, split_in, split_by_style, visibility, session)
+
+        return render_template('done.html', playlists=created_playlists)
+
     return render_template('split.html', playlists=fetch_playlists())
 
 
-@app.route("/reorder", methods=['GET'])
+@app.route("/reorder", methods=['GET', 'POST'])
 @authenticated_resource
 def reorder():
     if spotify_helper.needs_refresh:
         spotify_helper.refresh_token()
 
+    if request.method == "POST":
+        playlists_to_reorder = request.form.getlist('playlists_to_reorder')
+        tracks = fetch_tracks(playlists_to_reorder)
+        tracks_info = fetch_tracks_info(tracks)
+
+        make_public =  request.form.get('reorder_visibility')
+        reorder_by_style = request.form.get('reorder_order_mode_style')
+
+        created_playlist = reorder_playlists(tracks_info, make_public, reorder_by_style, session)
+        return render_template('done.html', playlists=created_playlist)
+
     return render_template('reorder.html', playlists=fetch_playlists())
+
 
 
 @app.route("/merge", methods=['GET', 'POST'])
@@ -118,8 +146,8 @@ def merge():
             name = 'Merged Playlist'
 
         make_public =  request.form.get('merge_is_public') is not None
-        merge_by_order = request.form.get('merge_order_mode_style')
-        created_playlist = merge_tracks(tracks_info, name, make_public, merge_by_order, session)
+        merge_by_style = request.form.get('merge_order_mode_style')
+        created_playlist = merge_tracks(tracks_info, name, make_public, merge_by_style, session)
         return render_template('done.html', playlists=[created_playlist])
 
     return render_template('merge.html', playlists=fetch_playlists())
@@ -129,6 +157,7 @@ def fetch_playlists():
     playlists = [{
                 "id": "saved_tracks",
                 "name": "Saved Tracks",
+                "public": False,
                 "tracks_info": {'href':"https://api.spotify.com/v1/me/tracks"}
             }]
 
@@ -141,16 +170,18 @@ def fetch_playlists():
         items = response['items']
         url = response['next']
 
-        for data in items:
+        for item in items:
             playlists.append({
-                "id": data["id"],
-                "name": data["name"],
-                "tracks_info": data["tracks"]
+                "id": item["id"],
+                "name": item["name"],
+                "tracks_info": item["tracks"],
+                "public": item['public']
             })
 
         if not url:
             break
 
+    playlists = sorted(playlists, key=lambda d: d['name']) 
     return playlists
 
 
@@ -208,20 +239,22 @@ def fetch_tracks_info(playlists) :
             for item in items:
                 if item is not None:
                     t_id = item['id']
-                    audio_features = np.array([v for k,v in item.items() if k in audio_features_fields])
+                    audio_features = [v for k,v in item.items() if k in audio_features_fields]
                     playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
 
+    with open('out.json', 'w') as f:
+        json.dump(playlists, f)
     return playlists
 
 
-def merge_tracks(playlists, name, make_public, merge_by_order, flask_session):
+def merge_tracks(playlists, name, make_public, merge_by_style, flask_session):
     tracks_uris = []
 
     for p_id in playlists:
         for t_id in playlists[p_id]['tracks']:
             tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
 
-    if merge_by_order:
+    if merge_by_style:
         # change it to do smth cool
         random.shuffle(tracks_uris)
     else:
@@ -232,8 +265,73 @@ def merge_tracks(playlists, name, make_public, merge_by_order, flask_session):
     return create_and_add_playlist(name, description, make_public, tracks_uris, flask_session)
 
 
-def create_and_add_playlist(name, descr, make_public, tracks, flask_session):
+def reorder_playlists(playlists, visibility, reorder_by_style, flask_session):
+    created_playlists = []
 
+    for p_id in playlists:
+        tracks_uris = []
+
+        for t_id in playlists[p_id]['tracks']:
+            tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
+
+        if reorder_by_style:
+            # change it to do smth cool
+            random.shuffle(tracks_uris)
+        else:
+            random.shuffle(tracks_uris)
+
+        name = f"Reordered {playlists[p_id]['name']}"
+        description = f"Reordered playlist created by SUPER-PLAYLISTER-3000. Created from : {playlists[p_id]['name']}"
+
+        if visibility == 'ALL_PUBLIC':
+            make_public = True
+        elif visibility == 'KEEP_VISIBILITY':
+            make_public = playlists[p_id]['public']
+        else:
+            make_public = False
+
+        created_playlists.append(create_and_add_playlist(name, description, make_public, tracks_uris, flask_session))
+
+    return created_playlists
+
+
+# https://stackoverflow.com/a/11574640
+def split_in_n(arr, count):
+     return [arr[i::count] for i in range(count)]
+
+
+def split_playlists(playlists, split_in, split_by_style, visibility, flask_session):
+    created_playlists = []
+
+    for p_id in playlists:
+        tracks_uris = []
+        for t_id in playlists[p_id]['tracks']:
+            tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
+
+        if split_by_style:
+            # change it to do smth cool
+            random.shuffle(tracks_uris)
+            split_playlists_content = split_in_n(tracks_uris, split_in)
+        else:
+            random.shuffle(tracks_uris)
+            split_playlists_content = split_in_n(tracks_uris, split_in)
+
+        if visibility == 'ALL_PUBLIC':
+            make_public = True
+        elif visibility == 'KEEP_VISIBILITY':
+            make_public = playlists[p_id]['public']
+        else:
+            make_public = False
+
+        for n, content in enumerate(split_playlists_content):
+            name = f"{playlists[p_id]['name']} [SPLIT #{n}]"
+            description = f"Split playlist created by SUPER-PLAYLISTER-3000. Created from : {playlists[p_id]['name']}"
+            created_playlists.append(create_and_add_playlist(name, description, make_public, content, flask_session))
+
+    return created_playlists
+
+
+def create_and_add_playlist(name, descr, make_public, tracks, flask_session):
     url = getCreatePlaylistURL(flask_session['user_id'])
     body = {
         'name': name,
@@ -256,12 +354,5 @@ def create_and_add_playlist(name, descr, make_public, tracks, flask_session):
         spotify_helper.makePostRequest(flask_session, url, body=body)
         pos += len(chunk)
 
+
     return created_playlist
-
-
-@app.route('/reorder')
-@authenticated_resource
-def reorder_songs():
-    time.sleep(3)
-    print("wow reordered so fast")
-    return ("nothing")

@@ -19,18 +19,35 @@
         <p class="title">💿 Select source playlists to reorder</p>
         <div class="selection">
           {%for p in playlists%}
-          <input class="custom-checkbox" type="checkbox" id="{{p['id']}}" name="{{p['name']}}" value="{{p['id']}}" />
+          <input class="custom-checkbox" type="checkbox" id="{{p['id']}}" name="playlists_to_reorder" value="{{p}}" />
           <label class="playlist-title" for="{{p['id']}}">{{p['name']}}</label><br />
           {%endfor%}
         </div>
       </div>
 
-      <div class="split right"></div>
+      <div class="split right">
+        <p class="options-title">Options:</p>
+
+        <p class="sub-label">Visibility:</p>
+        <input checked type="radio" id="reorder_all_public" name="reorder_visibility" value="ALL_PUBLIC" />
+        <label class="options-label-padded" for="reorder_all_public">All public</label><br />
+
+        <input checked type="radio" id="reorder_keep_visibility" name="reorder_visibility" value="KEEP_VISIBILITY" />
+        <label class="options-label-padded" for="reorder_keep_visibility">Keep visibility</label><br />
+
+        <input type="radio" id="reorder_all_private" name="reorder_visibility" value="ALL_PRIVATE" />
+        <label class="options-label-padded" for="reorder_all_private">All private</label><br />
+
+        <p class="sub-label">Order:</p>
+        <input checked type="radio" id="reorder_rnd" name="reorder_order_mode_style" value="false" />
+        <label class="options-label-padded" for="reorder_rnd">Reorder randomly</label><br />
+
+        <input type="radio" id="reorder_style" name="reorder_order_mode_style" value="true" />
+        <label class="options-label-padded" for="reorder_style">Reorder by style</label><br />
+      </div>
     </div>
     <div class="button-row">
-      <div class="path_button">
-        <input type="submit" class="path_button submit_btn" value="Go!" onclick="loading();" />
-      </div>
+      <input type="submit" class="path_button submit_btn" value="Go!" onclick="loading();" />
     </div>
   </form>
 </div>
