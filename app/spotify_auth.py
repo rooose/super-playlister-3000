@@ -106,13 +106,16 @@ class SpotifyAuth():
 
     def makeGetRequest(self, session, url, params={}):
         headers = {"Authorization": "Bearer {}".format(session['token'])}
+
         response = requests.get(url, headers=headers, params=params)
+
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 401 and self.checkTokenStatus(session) != None:
             return self.makeGetRequest(session, url, params)
         else:
             print('makeGetRequest:' + str(response.status_code))
+            print(response.__dict__)
             return None
 
 
@@ -135,7 +138,6 @@ class SpotifyAuth():
     def getUserInformation(self, session):
         url = 'https://api.spotify.com/v1/me'
         payload = self.makeGetRequest(session, url)
-
         if payload == None:
             return None
 
