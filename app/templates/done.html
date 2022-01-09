@@ -8,8 +8,19 @@
 
 {% block content %}
 
-<h1>Done</h1>
-
+<div class="navbar-row">
+    <span class="path_button"><a class="login_btn" href="/"><i class="fas fa-home"></i></a></span>
+    <span class="path_button"><a class="login_btn" href="/login"><i class="fas fa-sign-out-alt"></i></a></span>
+  </div>
+  
+<div class="results-row">
+    <p class="title">💿 DONE! 💿</p>
+    <div class="selection">
+    {%for p in playlists%}
+    <p class="playlist-title">{{p['name']}}</p>
+    {%endfor%}
+    </div>
+</div>
 
 {% endblock %}
 

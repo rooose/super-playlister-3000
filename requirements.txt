@@ -1,1 +1,5 @@
 flask-login
+scikit-learn
+matplotlib
+scipy
+k-means-constrained

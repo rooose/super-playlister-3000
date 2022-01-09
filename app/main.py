@@ -5,6 +5,7 @@ from flask_cors import CORS
 
 from .config import CONFIG, APP_SECRET
 from .spotify_auth import *
+from .matrix_helper import *
 from functools import wraps
 
 import time
@@ -225,7 +226,7 @@ def fetch_tracks(playlists_data):
 
 def fetch_tracks_info(playlists) :
     limit = 100
-    audio_features_fields = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
+    audio_features_fields = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo'] #minus key and mode
 
     for p_id in playlists:
         all_tracks_ids = list(playlists[p_id]['tracks'].keys())
@@ -243,8 +244,18 @@ def fetch_tracks_info(playlists) :
                     audio_features = [v for k,v in item.items() if k in audio_features_fields]
                     playlists[p_id]['tracks'][t_id]['audio_features'] = audio_features
 
+        # t_id_to_rmv = []
+
+        # for t_id in playlists[p_id]['tracks']:
+        #     if playlists[p_id]['tracks'][t_id]['audio_features'] is None:
+        #         t_id_to_rmv.append(t_id)
+
+        # for t_id in t_id_to_rmv:
+        #     del playlists[p_id]['tracks'][t_id]
+
     # with open('out.json', 'w') as f:
     #     json.dump(playlists, f)
+
     return playlists
 
 
@@ -311,8 +322,10 @@ def split_playlists(playlists, split_in, split_by_style, visibility, flask_sessi
 
         if split_by_style:
             # change it to do smth cool
-            random.shuffle(tracks_uris)
-            split_playlists_content = split_in_n(tracks_uris, split_in)
+            # random.shuffle(tracks_uris)
+            # split_playlists_content = split_in_n(tracks_uris, split_in)
+            split_playlists_content = group_songs(playlists[p_id]['tracks'], 9)
+
         else:
             random.shuffle(tracks_uris)
             split_playlists_content = split_in_n(tracks_uris, split_in)
@@ -325,7 +338,9 @@ def split_playlists(playlists, split_in, split_by_style, visibility, flask_sessi
             make_public = False
 
         for n, content in enumerate(split_playlists_content):
-            name = f"{playlists[p_id]['name']} [SPLIT #{n}]"
+            # print(content)
+            # print(type(content))
+            name = f"{playlists[p_id]['name']} [SPLIT #{n + 1}]"
             description = f"Split playlist created by SUPER-PLAYLISTER-3000. Created from : {playlists[p_id]['name']}"
             created_playlists.append(create_and_add_playlist(name, description, make_public, content, flask_session))
 
