@@ -1,4 +1,3 @@
-from re import S
 from flask import Flask, request, render_template, redirect, session, make_response
 from flask.templating import render_template_string
 from flask_cors import CORS
@@ -8,11 +7,8 @@ from .spotify_auth import *
 from .matrix_helper import *
 from functools import wraps
 
-import time
 import ast
-import numpy as np
 import random
-import csv
 
 # TODO: Use Flask sessions
 app = Flask(__name__)

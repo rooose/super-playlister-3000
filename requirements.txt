@@ -6,3 +6,4 @@ scikit-learn
 matplotlib
 scipy
 k-means-constrained
+requests
