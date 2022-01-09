@@ -321,9 +321,6 @@ def split_playlists(playlists, split_in, split_by_style, visibility, flask_sessi
             tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
 
         if split_by_style:
-            # change it to do smth cool
-            # random.shuffle(tracks_uris)
-            # split_playlists_content = split_in_n(tracks_uris, split_in)
             split_playlists_content = group_songs(playlists[p_id]['tracks'], 9)
 
         else:
@@ -338,8 +335,6 @@ def split_playlists(playlists, split_in, split_by_style, visibility, flask_sessi
             make_public = False
 
         for n, content in enumerate(split_playlists_content):
-            # print(content)
-            # print(type(content))
             name = f"{playlists[p_id]['name']} [SPLIT #{n + 1}]"
             description = f"Split playlist created by SUPER-PLAYLISTER-3000. Created from : {playlists[p_id]['name']}"
             created_playlists.append(create_and_add_playlist(name, description, make_public, content, flask_session))
