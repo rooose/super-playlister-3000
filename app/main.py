@@ -140,7 +140,7 @@ def merge():
         tracks = fetch_tracks(playlists_to_merge)
         tracks_info = fetch_tracks_info(tracks)
         name = request.form.get('merged_playlist_name')
-        if name is None:
+        if name is None or len(name) == 0:
             name = 'Merged Playlist'
 
         make_public =  request.form.get('merge_is_public') is not None
@@ -257,19 +257,20 @@ def fetch_tracks_info(playlists) :
 
 def merge_tracks(playlists, name, make_public, merge_by_style, flask_session):
     tracks_uris = []
+    all_tracks_info = {}
 
     for p_id in playlists:
         for t_id in playlists[p_id]['tracks']:
             tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
+            all_tracks_info[t_id] = playlists[p_id]['tracks'][t_id]
 
     if merge_by_style:
-        # change it to do smth cool
-        random.shuffle(tracks_uris)
+        tracks_uris = order_songs(all_tracks_info, 9)
     else:
         random.shuffle(tracks_uris)
 
-    merged_playlists = [playlists[p_id]['name'] for p_id in playlists]
-    description = f"Merge playlist created by SUPER-PLAYLISTER-3000. Created from : {', '.join(merged_playlists)}"
+    merged_playlists_names = [playlists[p_id]['name'] for p_id in playlists]
+    description = f"Merge playlist created by SUPER-PLAYLISTER-3000. Created from : {', '.join(merged_playlists_names)}"
     return create_and_add_playlist(name, description, make_public, tracks_uris, flask_session)
 
 
@@ -283,8 +284,7 @@ def reorder_playlists(playlists, visibility, reorder_by_style, flask_session):
             tracks_uris.append(playlists[p_id]['tracks'][t_id]['uri'])
 
         if reorder_by_style:
-            # change it to do smth cool
-            random.shuffle(tracks_uris)
+           tracks_uris = order_songs(playlists[p_id]['tracks'], 9)
         else:
             random.shuffle(tracks_uris)
 

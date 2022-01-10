@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import distance
 from k_means_constrained import KMeansConstrained
+import random
 
 def build_feature_matrix(tracks, tracks_ids, n_audio_features):
     vector_dict = {}
@@ -72,3 +73,36 @@ def group_songs(tracks, n_audio_features):
     playlists = [ p for p in playlists if len(p) > 0]
 
     return playlists
+
+
+def order_songs(tracks, n_audio_features):
+    no_info = []
+    tracks_ids = []
+
+    for t_id in tracks:
+        if tracks[t_id]['audio_features'] is None:
+            no_info.append(tracks[t_id]['uri'])
+        else:
+            tracks_ids.append(t_id)
+
+    feature_matrix = build_feature_matrix(tracks, tracks_ids, n_audio_features)
+    distance_matrix = calculate_dist_matrix(feature_matrix)
+
+    n_songs = len(tracks_ids)
+    curr_song = random.randint(0, n_songs - 1)
+
+    visited = [curr_song]
+
+    for _ in range(1, n_songs):
+
+        for s in range(n_songs):
+            distance_matrix[s][curr_song] = float('inf')
+
+        curr_song = np.argmin(distance_matrix[curr_song, :])
+        visited.append(curr_song)
+
+    reordered = [tracks[tracks_ids[v]]['uri'] for v in visited] + no_info
+
+    # TODO: Add randomness
+
+    return reordered
